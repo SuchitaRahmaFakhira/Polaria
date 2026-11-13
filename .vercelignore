@@ -1,0 +1,8 @@
+.venv
+tests
+docs
+*.md
+pytest.ini
+.pytest_cache
+.env
+.env.*
