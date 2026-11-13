@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index" }],
+  "framework": null,
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "api/_logika/**"
+    }
+  },
+  "rewrites": [{ "source": "/api/:jalur*", "destination": "/api/index" }],
   "headers": [
     {
       "source": "/sw.js",
