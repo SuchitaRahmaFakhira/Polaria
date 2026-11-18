@@ -11,6 +11,8 @@ export const MENU_UTAMA = [
   { judul: "Kalkulator Ganjil Genap", sub: "Cek bilangan dan lihat cara perhitungannya.", ikonNama: "kalkulator", warna: "biru", href: "#/kalkulator" },
   { judul: "Generator Pola Bilangan", sub: "Buat pola bilangan secara otomatis.", ikonNama: "kotak", warna: "hijau", href: "#/generator" },
   { judul: "Latihan Soal", sub: "Kerjakan soal interaktif sesuai materi.", ikonNama: "kotak", warna: "jingga", href: "#/latihan" },
+  { judul: "Tanya AI Matematika", sub: "Tanyakan materi atau soal, tutor AI menjelaskan langkahnya.", ikonNama: "tanda_tanya", warna: "biru", href: "#/tanya" },
+  { judul: "Pemecahan Masalah RMT", sub: "Selesaikan soal cerita bersama tutor, tahap demi tahap.", ikonNama: "lampu", warna: "ungu", href: "#/rmt" },
   { judul: "Evaluasi", sub: "Uji pemahamanmu dengan tes pilihan ganda.", ikonNama: "piala", warna: "ungu", href: "#/evaluasi" },
   { judul: "Hasil Belajar", sub: "Lihat perkembangan belajarmu.", ikonNama: "grafik", warna: "kuning", href: "#/nilai" },
 ];

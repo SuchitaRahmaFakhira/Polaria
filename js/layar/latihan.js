@@ -5,6 +5,7 @@ import { kepala, itemMenu, tombolRumus } from "../komponen.js";
 import { ambilSesi, periksa } from "../api.js";
 import { ubah } from "../data.js";
 import { simpanJawaban } from "../supabase.js";
+import { bukaTutorLatihan } from "../tutor.js";
 import { LABEL_TIPE } from "../evaluasi/soal-tetap.js";
 
 const LEVEL = {
@@ -211,6 +212,7 @@ export function layarLatihan(level) {
             { class: "baris", style: { flexWrap: "wrap", gap: "8px" } },
             h("button", { class: "tombol-garis", type: "button", onclick: cobaLagi }, ikon("ulang", 18), "Coba lagi"),
             st.petunjukKe < 3 ? h("button", { class: "tombol-garis", type: "button", onclick: tambahPetunjuk }, ikon("lampu", 18), `Petunjuk ${st.petunjukKe + 1}`) : null,
+            h("button", { class: "tombol-garis", type: "button", onclick: () => bukaTutorLatihan(daftar[i], st.jawaban) }, ikon("orang", 18), "Tanya tutor"),
             h("button", { class: "tombol-teks", type: "button", onclick: () => ((st.tampilBahas = true), gambar()) }, "Lihat pembahasan"),
           ),
     );

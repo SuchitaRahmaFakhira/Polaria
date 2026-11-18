@@ -1,5 +1,5 @@
 // Service worker Polaria. Naikkan VERSI setiap kali file di bawah berubah.
-const VERSI = "polaria-v1";
+const VERSI = "polaria-v6";
 const CACHE_LUAR = "polaria-luar-v1";
 
 const APP_SHELL = [
@@ -18,6 +18,7 @@ const APP_SHELL = [
   "/js/progres.js",
   "/js/supabase.js",
   "/js/tema.js",
+  "/js/tutor.js",
   "/js/util.js",
   "/js/materi/konten.js",
   "/js/evaluasi/soal-tetap.js",
@@ -31,6 +32,8 @@ const APP_SHELL = [
   "/js/layar/modul.js",
   "/js/layar/nilai.js",
   "/js/layar/pengaturan.js",
+  "/js/layar/rmt.js",
+  "/js/layar/tanya.js",
   "/assets/ikon/ikon-192.png",
   "/assets/ikon/ikon-512.png",
   "/assets/ikon/apple-touch-icon.png",

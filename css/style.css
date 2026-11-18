@@ -73,7 +73,7 @@ body {
   line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
 }
-button, input, select { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 h1, h2, h3, p { margin: 0; }
 :focus-visible { outline: 3px solid var(--primer); outline-offset: 2px; border-radius: 8px; }
@@ -299,9 +299,9 @@ select.bidang { appearance: none; padding-right: 40px; background-image: none; }
 .kolom-pola th, .kolom-pola td { text-align: center; padding: 3px 0; }
 .kolom-pola th { font-size: 0.8rem; color: var(--teks-redup); font-weight: 600; }
 .kolom-pola .rumus { font-weight: 800; text-align: center; margin-top: 6px; }
-.garis-bilangan { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+.garis-bilangan { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
 .garis-bilangan button {
-  aspect-ratio: 1; border: 0; border-radius: 10px; font-weight: 700; font-size: 0.9rem; min-height: 30px;
+  aspect-ratio: 1; border: 0; border-radius: 8px; font-weight: 700; font-size: 0.85rem; min-height: 30px; min-width: 0; padding: 0;
 }
 .garis-bilangan .genap { background: var(--genap-lembut); color: var(--genap); }
 .garis-bilangan .ganjil { background: var(--ganjil-lembut); color: var(--ganjil); }
@@ -394,3 +394,58 @@ body.tanpa-nav .nav-bawah { display: none; }
   padding: 6px 12px; border-radius: 12px;
 }
 .memuat { display: grid; place-items: center; min-height: 120px; color: var(--teks-redup); }
+
+/* ---------- Pemecahan Masalah RMT & tutor ---------- */
+.stepper-rmt { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.stepper-rmt li { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 600; color: var(--teks-redup); text-align: center; }
+.bulat-tahap {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 2px solid var(--garis); font-weight: 700; font-size: 0.85rem;
+}
+.stepper-rmt li.aktif { color: var(--primer); }
+.stepper-rmt li.aktif .bulat-tahap { border-color: var(--primer); color: var(--primer); }
+.stepper-rmt li.selesai .bulat-tahap { background: var(--primer); border-color: var(--primer); color: var(--di-primer); }
+.daftar-tahap { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 2px; }
+.kartu-soal { border-left: 4px solid var(--primer); }
+
+.gelembung-tutor {
+  background: var(--surface-lembut); border-radius: 18px 18px 18px 6px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--garis);
+}
+.gelembung-kepala { display: flex; align-items: center; gap: 8px; }
+.avatar-tutor { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--primer); color: var(--di-primer); }
+.label-sumber { margin-left: auto; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface); color: var(--teks-redup); }
+.pertanyaan-tutor { font-weight: 700; color: var(--primer); }
+.memuat-tutor { opacity: 0.8; }
+.gelembung-siswa {
+  align-self: flex-end; max-width: 85%; background: var(--primer); color: var(--di-primer);
+  border-radius: 18px 18px 6px 18px; padding: 10px 14px; font-size: 0.92rem;
+}
+.area-teks { min-height: 72px; padding-right: 16px; resize: vertical; line-height: 1.45; }
+.chip-pilihan { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-opsi {
+  min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--garis);
+  background: var(--surface); font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center;
+}
+button.chip-opsi[aria-pressed="true"] { border-color: var(--primer); color: var(--primer); background: var(--surface-lembut); }
+.alat-bantu { margin-top: 6px; }
+.tanya-bebas { background: var(--surface); border: 1px solid var(--garis); border-radius: 16px; padding: 10px 14px; }
+.tanya-bebas summary { cursor: pointer; font-weight: 600; color: var(--primer); min-height: 32px; display: flex; align-items: center; }
+.tanya-bebas[open] summary { margin-bottom: 8px; }
+.label-fase {
+  display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+  color: var(--primer); background: var(--surface-lembut); border-radius: 6px; padding: 1px 6px; margin-right: 6px;
+}
+
+a.tombol, a.tombol-garis { text-decoration: none; }
+
+/* ---------- Tanya AI ---------- */
+.percakapan { gap: 10px; }
+.jawaban-ai { display: flex; flex-direction: column; gap: 6px; }
+.jawaban-ai ol, .jawaban-ai ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+.jawaban-ai p { overflow-wrap: anywhere; }
+.gelembung-siswa { white-space: pre-wrap; overflow-wrap: anywhere; }
+.chip-pilihan .chip-opsi { text-align: left; min-height: 40px; padding: 6px 14px; }
+[hidden] { display: none !important; }
+.jawaban-ai li > ul { margin-top: 4px; }
+.lanjutan-langkah { font-variant-numeric: tabular-nums; }

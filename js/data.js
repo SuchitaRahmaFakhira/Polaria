@@ -10,6 +10,8 @@ function bawaan() {
     progres: {}, // { [modulId]: { selesai, skor, total, diperbarui } }
     latihan: [], // [{ level, benar, total, perTipe, waktu }]
     evaluasi: {}, // { pre: {...}, post: {...} }
+    rmt: [], // [{ level, tahap: { input: { percobaan, petunjuk } , … }, waktu }]
+    jurnal: [], // [{ konteks, isi, waktu }]
     pengaturan: { tema: "sistem", hurufBesar: false },
   };
 }

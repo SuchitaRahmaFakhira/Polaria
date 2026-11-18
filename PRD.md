@@ -1,10 +1,12 @@
 # PRD — Polaria: Aplikasi Belajar Pola Bilangan Ganjil & Genap
 
-**Versi:** 0.2 (draf perencanaan) · **Tanggal:** 13 November 2026 · **Penyusun:** Suchita Rahma Fakhira
+**Versi:** 0.3 · **Tanggal:** 18 November 2026 · **Penyusun:** Suchita Rahma Fakhira
 
 Dokumen terkait: [docs/ANALISIS-KEBUTUHAN.md](docs/ANALISIS-KEBUTUHAN.md) · [DESAIN.md](DESAIN.md) · [CLAUDE.md](CLAUDE.md) · [README.md](README.md)
 
 **Perubahan v0.2:** aplikasi menjadi **PWA** yang bisa dipasang di HP tanpa Play Store/App Store; logika matematika dipindah ke **API Python (FastAPI)**; menu dan tampilan mengikuti mockup ([docs/referensi-tampilan.jpg](docs/referensi-tampilan.jpg)); fitur baru F-13 s.d. F-18.
+
+**Perubahan v0.3:** model pembelajaran **Rigorous Mathematical Thinking (RMT)** (Kinard & Kozulin) dan **tutor AI Gemini**: mode Pemecahan Masalah RMT (F-19), lapisan MLE di modul (F-20), jurnal refleksi (F-21).
 
 ---
 
@@ -26,6 +28,7 @@ Polaria adalah aplikasi web yang menyajikan materi secara bertahap, ringkas, vis
 | Logika matematika | **Python 3.12 + FastAPI** | API: kalkulator, generator pola, generator soal, pemeriksa jawaban & pembahasan |
 | Data & login | Supabase | Auth anonim, penyimpanan progres, jawaban, evaluasi |
 | Hosting | Vercel | File statis + Python serverless function (`/api/*`), HTTPS otomatis |
+| Tutor AI | Google Gemini API (`gemini-3.5-flash-lite`, bisa diganti lewat `GEMINI_MODEL`) | Merangkai kalimat bimbingan; dipanggil hanya dari server; benar/salah tetap diputuskan Python |
 | Pemasangan di HP | PWA | "Tambahkan ke layar utama" dari Chrome (Android) atau Safari (iPhone), tanpa toko aplikasi |
 
 ## 3. Tujuan
@@ -107,6 +110,17 @@ Konten materi bersifat statis (file JS) agar bisa dibaca saat offline.
 | F-16 | **Hasil Belajar / Nilai** | Riwayat skor latihan per level dan skor pre/post-test, serta ringkasan per tipe soal (mis. "Mencari Un: 4/5"). | EL04, GL02 | — |
 | F-12 | Penyimpanan data | Progres, jawaban latihan, dan hasil evaluasi disimpan ke Supabase; antrian offline di localStorage. | Data tahap E | — |
 
+### 6.5 Rigorous Mathematical Thinking (RMT) + tutor AI
+
+| Kode | Fitur | Deskripsi | Dasar | API |
+|---|---|---|---|---|
+| F-19 | **Pemecahan Masalah RMT** | Soal literasi (soal cerita) dikerjakan lewat 4 tahap: **Pahami (Input)** → **Rencanakan (Elaborasi)** → **Kerjakan (Output)** → **Renungkan (Refleksi)**. Tiap tahap punya tujuan (MLE), isian terstruktur, alat bantu (tabel, garis bilangan, kartu rumus), dan tutor yang memberi petunjuk bertingkat 1–3 tanpa memberi jawaban akhir. Tahap Kerjakan wajib menulis langkah sebelum jawaban (mencegah coba-coba). | RMT, IL01, IL05, EL01, GL01–GL05 | ✔ `/api/rmt/masalah`, `/api/rmt/tutor` |
+| F-19a | Tanya tutor di Latihan | Saat jawaban latihan salah, siswa bisa membuka tutor untuk soal itu. | GL03 | ✔ `/api/rmt/tutor` |
+| F-20 | **Lapisan MLE di modul** | Modul 1–3 diawali slide **Tujuan** (intensionalitas) dan **Makna** (konsep sehari-hari → ilmiah), diakhiri **Transendensi** (aturan berlaku di konteks lain). Langkah contoh soal diberi label fase Input/Elaborasi/Output. | RMT (MLE) | — |
+| F-22 | **Tanya AI Matematika** | Siswa mengetik pertanyaan matematika apa pun. Gemini menjelaskan materi dengan contoh dan membimbing soal dengan langkah RMT (Pahami → Rencanakan → Kerjakan → Periksa). Untuk soal latihan, hitungan terakhir diserahkan ke siswa lalu diperiksa. Jawaban selalu asli dari Gemini; jika AI tidak tersedia, muncul pesan jujur, bukan jawaban tiruan. Menu Beranda + tombol di halaman Materi. | Permintaan pengguna 18 Nov 2026, GL01, EL01 | ✔ `/api/tanya` |
+| F-21 | **Jurnal refleksi** | Pertanyaan refleksi di akhir modul dan di akhir sesi RMT; tersimpan lokal dan di Supabase. | RMT (metakognisi) | — |
+| F-16 | Hasil Belajar (tambahan) | Diagnosis fase RMT: tahap yang paling sering butuh petunjuk, beserta saran. | RMT (diagnosis fase) | — |
+
 ### 6.5 Alur utama
 Masuk → Beranda → Materi (Pemanasan → Modul 1 → Modul 2 → Modul 3) → Latihan (3 level) → Hasil Belajar.
 Evaluasi: pre-test sebelum Materi pertama kali, post-test setelah semua modul selesai.
@@ -123,7 +137,10 @@ Semua endpoint di bawah `/api`, dijalankan oleh FastAPI di `api/index.py`. API *
 | `GET /api/soal?level=mudah&jumlah=10` | level, jumlah 1–20, `seed` opsional | `soal[]`: `id`, `tipe`, `bentuk`, `teks`, `pilihan[]` (jika pilihan ganda), `parameter` (jenis, n, dll.), `paket` (kunci, petunjuk, pembahasan — untuk mode offline) |
 | `POST /api/periksa` | `soal` (tipe + parameter), `jawaban`, `petunjuk_ke` | `benar`, `kunci`, `petunjuk`, `pembahasan[]`, `cek_substitusi` |
 | `GET /api/kesehatan` | — | `{"status": "ok"}` (untuk uji dan memanaskan fungsi) |
-| `GET /api/config` | — | `supabase_url`, `supabase_anon_key` dari `.env`/Environment Variables; kosong jika belum diatur atau jika kuncinya rahasia |
+| `GET /api/config` | — | `supabase_url`, `supabase_anon_key` dari `.env`/Environment Variables (kosong jika belum diatur atau jika kuncinya rahasia), dan `ai_aktif` (boolean). Kunci Gemini **tidak pernah** dikirim |
+| `POST /api/tanya` | `pertanyaan` (2–600 karakter), `riwayat` (≤ 20 giliran) | `jawaban` (teks, LaTeX dibersihkan), `sumber: "gemini"`, `model`. 503 bila `GEMINI_API_KEY` belum diatur, 502 bila Gemini gagal, 429 bila terlalu sering |
+| `GET /api/rmt/masalah?level=…&seed=…` | level, seed opsional | Soal literasi + pilihan tiap tahap RMT, tanpa kunci |
+| `POST /api/rmt/tutor` | `masalah` (tipe + parameter), `tahap`, `isian`, `pesan` (≤ 400), `riwayat` (≤ 12 giliran), `tingkat` 0–3, `sudah_selesai` | `benar`, `lanjut`, `kesulitan` (input_data / input_ditanya / konsep_pola / konsep_rumus / hitung / refleksi), `tingkat_petunjuk`, `tujuan`, `pesan`, `pertanyaan`, `sumber` (`gemini` / `aturan`). Dibatasi 30 permintaan/menit per IP |
 
 Validasi masukan dengan Pydantic; error dikembalikan dengan pesan berbahasa Indonesia yang ramah.
 
@@ -148,6 +165,8 @@ Validasi masukan dengan Pydantic; error dikembalikan dengan pesan berbahasa Indo
 | `progres_modul` | `id` bigint (PK), `siswa_id` uuid (FK), `modul` text, `selesai` boolean, `skor` int, `diperbarui` timestamptz | Unik per (`siswa_id`, `modul`) |
 | `jawaban_latihan` | `id` bigint (PK), `siswa_id` uuid (FK), `level` text, `tipe_soal` text, `soal` jsonb, `jawaban` text, `benar` boolean, `jumlah_petunjuk` int, `durasi_detik` int, `dijawab` timestamptz | Satu baris per jawaban |
 | `hasil_evaluasi` | `id` bigint (PK), `siswa_id` uuid (FK), `jenis` text (`pre`/`post`), `skor` int, `jawaban` jsonb, `durasi_detik` int, `dikerjakan` timestamptz | Bahan perbandingan pre/post-test |
+| `interaksi_tutor` | `id`, `siswa_id`, `sesi_id`, `masalah` jsonb, `tahap`, `kesulitan`, `tingkat_petunjuk`, `pesan_siswa`, `pesan_tutor`, `sumber`, `benar`, `dibuat` | Percakapan tutor tanpa nama, untuk analisis cognitive load per fase RMT |
+| `jurnal_refleksi` | `id`, `siswa_id`, `konteks` (modul1…/rmt-level), `isi` (≤ 500), `dibuat` | Jurnal metakognisi |
 
 **Kebijakan RLS** (semua tabel): `select`, `insert`, `update` hanya jika `auth.uid() = siswa_id` (tabel `siswa`: `auth.uid() = id`). Tidak ada `delete` dari aplikasi.
 
@@ -181,3 +200,7 @@ Validasi masukan dengan Pydantic; error dikembalikan dengan pesan berbahasa Indo
 | Akun anonim hilang saat ganti perangkat | Dicatat sebagai keterbatasan; data dicocokkan manual |
 | Kuota gratis Supabase/Vercel | Skala uji coba kecil; data berukuran kecil |
 | Baru satu responden analisis | Tambah responden sebelum finalisasi desain |
+| **Syarat Gemini API melarang pengguna di bawah 18 tahun** dan layanan yang *"likely to be accessed by individuals under the age of 18"*, sedangkan sasaran Polaria siswa SMP | **Risiko diterima pengembang** (keputusan 18 Nov 2026). Akun/kunci bisa dinonaktifkan Google. Tutor tetap berjalan dengan petunjuk bawaan bila Gemini tidak tersedia. Pertimbangkan jalur yang patuh (izin sekolah, Vertex AI, atau penyedia lain) sebelum uji coba luas |
+| Jawaban siswa dikirim ke Google | Nama siswa tidak pernah dikirim; hanya soal, isian, dan pesan. Cantumkan di lembar persetujuan penelitian |
+| AI membocorkan jawaban atau berhalusinasi | Benar/salah diputuskan Python; penyaring mengganti respons yang memuat jawaban akhir; prompt melarang membocorkan jawaban dan mengabaikan perintah dari siswa |
+| Kuota/biaya Gemini, penyalahgunaan endpoint | Batas 30 permintaan/menit per IP, riwayat ≤ 8 giliran, `maxOutputTokens` 400; cadangan petunjuk bawaan |

@@ -77,3 +77,45 @@ create policy "evaluasi_tambah_sendiri" on public.hasil_evaluasi for insert to a
 
 -- Tidak ada kebijakan DELETE: data tidak bisa dihapus dari aplikasi.
 -- Peneliti membaca semua data lewat Table Editor / SQL Editor (memakai peran admin).
+
+-- ---------- Tutor RMT & jurnal refleksi (tanpa nama siswa) ----------
+-- Aman dijalankan ulang: hanya menambah yang belum ada.
+
+create table if not exists public.interaksi_tutor (
+  id bigint generated always as identity primary key,
+  siswa_id uuid not null references public.siswa (id) on delete cascade,
+  sesi_id text not null,
+  masalah jsonb not null,
+  tahap text not null check (tahap in ('input', 'elaborasi', 'output', 'refleksi')),
+  kesulitan text,
+  tingkat_petunjuk int not null default 0,
+  pesan_siswa text not null default '',
+  pesan_tutor text not null default '',
+  sumber text not null check (sumber in ('gemini', 'aturan')),
+  benar boolean not null default false,
+  dibuat timestamptz not null default now()
+);
+
+create table if not exists public.jurnal_refleksi (
+  id bigint generated always as identity primary key,
+  siswa_id uuid not null references public.siswa (id) on delete cascade,
+  konteks text not null,
+  isi text not null check (char_length(isi) between 1 and 500),
+  dibuat timestamptz not null default now()
+);
+
+create index if not exists interaksi_tutor_siswa_idx on public.interaksi_tutor (siswa_id);
+create index if not exists jurnal_refleksi_siswa_idx on public.jurnal_refleksi (siswa_id);
+
+alter table public.interaksi_tutor enable row level security;
+alter table public.jurnal_refleksi enable row level security;
+
+drop policy if exists "tutor_baca_sendiri" on public.interaksi_tutor;
+drop policy if exists "tutor_tambah_sendiri" on public.interaksi_tutor;
+create policy "tutor_baca_sendiri" on public.interaksi_tutor for select to authenticated using (auth.uid() = siswa_id);
+create policy "tutor_tambah_sendiri" on public.interaksi_tutor for insert to authenticated with check (auth.uid() = siswa_id);
+
+drop policy if exists "jurnal_baca_sendiri" on public.jurnal_refleksi;
+drop policy if exists "jurnal_tambah_sendiri" on public.jurnal_refleksi;
+create policy "jurnal_baca_sendiri" on public.jurnal_refleksi for select to authenticated using (auth.uid() = siswa_id);
+create policy "jurnal_tambah_sendiri" on public.jurnal_refleksi for insert to authenticated with check (auth.uid() = siswa_id);

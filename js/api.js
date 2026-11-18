@@ -108,3 +108,13 @@ export async function periksa(soal, jawaban, petunjukKe = 0) {
     throw e;
   }
 }
+
+// ---------- Pemecahan Masalah RMT + tutor (selalu butuh internet) ----------
+
+export const ambilMasalahRmt = (level) => panggil(`/api/rmt/masalah?level=${encodeURIComponent(level)}`);
+
+export const tanyaTutor = (badan) => panggil("/api/rmt/tutor", { metode: "POST", isi: badan, batas: 20000 });
+
+// Tanya AI (jawaban asli dari Gemini lewat server; butuh internet).
+export const tanyaAI = (pertanyaan, riwayat) =>
+  panggil("/api/tanya", { metode: "POST", isi: { pertanyaan, riwayat: riwayat.slice(-10) }, batas: 32000 });

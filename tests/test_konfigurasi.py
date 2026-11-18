@@ -49,6 +49,11 @@ def test_konfigurasi_publik():
 def test_endpoint_config(monkeypatch):
     monkeypatch.setenv("SUPABASE_URL", "https://abc.supabase.co")
     monkeypatch.setenv("SUPABASE_ANON_KEY", "sb_publishable_xyz")
-    assert klien.get("/api/config").json() == {"supabase_url": "https://abc.supabase.co", "supabase_anon_key": "sb_publishable_xyz"}
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    assert klien.get("/api/config").json() == {
+        "supabase_url": "https://abc.supabase.co",
+        "supabase_anon_key": "sb_publishable_xyz",
+        "ai_aktif": False,
+    }
     monkeypatch.setenv("SUPABASE_ANON_KEY", "sb_secret_xyz")
     assert klien.get("/api/config").json()["supabase_anon_key"] == ""

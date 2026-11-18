@@ -60,9 +60,20 @@ export async function sinkron() {
     for (const { tabel, baris, upsert } of daftar) {
       const kolomId = tabel === "siswa" ? "id" : "siswa_id";
       const isi = { ...baris, [kolomId]: uid };
-      const q = sb.from(tabel);
-      const { error } = upsert ? await q.upsert(isi, { onConflict: upsert }) : await q.insert(isi);
-      if (error) throw error;
+      const tulis = () => (upsert ? sb.from(tabel).upsert(isi, { onConflict: upsert }) : sb.from(tabel).insert(isi));
+      let { error } = await tulis();
+      if (error?.code === "23503") {
+        // Profil siswa belum ada di server: daftarkan lalu coba sekali lagi.
+        await daftarkanProfil(sb, uid);
+        ({ error } = await tulis());
+      }
+      if (error && galatPermanen(error)) {
+        // Mis. tabel belum dibuat (schema.sql belum dijalankan ulang) atau data ditolak:
+        // buang baris ini agar tidak menahan antrian selamanya.
+        console.warn(`Baris ${tabel} dilewati (${error.code}): ${error.message}`);
+      } else if (error) {
+        throw error; // galat sementara (jaringan, token): coba lagi nanti
+      }
       terkirim++;
     }
   } catch (galat) {
@@ -71,6 +82,16 @@ export async function sinkron() {
     if (terkirim) buangDepan(terkirim);
     sedangSinkron = false;
   }
+}
+
+// Kode galat Postgres/PostgREST yang tidak akan berhasil walau dicoba ulang.
+function galatPermanen(e) {
+  return /^(22|23|42|PGRST)/.test(String(e?.code || ""));
+}
+
+async function daftarkanProfil(sb, id) {
+  const profil = baca().profil;
+  if (profil) await sb.from("siswa").upsert({ id, nama: profil.nama, kelas: profil.kelas }, { onConflict: "id" });
 }
 
 function kirim(tabel, baris, upsert = null) {
@@ -108,3 +129,21 @@ export const simpanEvaluasi = (e) =>
   });
 
 window.addEventListener("online", sinkron);
+
+// Percakapan tutor (tanpa nama) untuk analisis tahap Evaluation.
+export const simpanInteraksiTutor = (t) =>
+  kirim("interaksi_tutor", {
+    sesi_id: t.sesiId,
+    masalah: t.masalah,
+    tahap: t.tahap,
+    kesulitan: t.kesulitan || null,
+    tingkat_petunjuk: t.tingkat ?? 0,
+    pesan_siswa: String(t.pesanSiswa ?? "").slice(0, 400),
+    pesan_tutor: String(t.pesanTutor ?? "").slice(0, 800),
+    sumber: t.sumber,
+    benar: Boolean(t.benar),
+    dibuat: new Date().toISOString(),
+  });
+
+export const simpanJurnal = (konteks, isi) =>
+  kirim("jurnal_refleksi", { konteks, isi: String(isi).slice(0, 500), dibuat: new Date().toISOString() });

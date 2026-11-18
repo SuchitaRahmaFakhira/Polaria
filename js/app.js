@@ -15,6 +15,8 @@ import { layarPilihLevel, layarLatihan } from "./layar/latihan.js";
 import { layarEvaluasi, layarTes } from "./layar/evaluasi.js";
 import { layarNilai } from "./layar/nilai.js";
 import { layarPengaturan } from "./layar/pengaturan.js";
+import { layarPilihRmt, layarRmt } from "./layar/rmt.js";
+import { layarTanya } from "./layar/tanya.js";
 
 const app = document.getElementById("app");
 
@@ -25,6 +27,8 @@ const RUTE = {
   kalkulator: () => layarKalkulator(),
   generator: () => layarGenerator(),
   latihan: (level) => (level ? layarLatihan(level) : layarPilihLevel()),
+  rmt: (level) => (level ? layarRmt(level) : layarPilihRmt()),
+  tanya: () => layarTanya(),
   evaluasi: (jenis) => (jenis ? layarTes(jenis) : layarEvaluasi()),
   nilai: () => layarNilai(),
   pengaturan: () => layarPengaturan(),
@@ -32,12 +36,12 @@ const RUTE = {
 
 const JUDUL = {
   beranda: "Beranda", materi: "Materi", modul: "Materi", kalkulator: "Kalkulator Ganjil Genap",
-  generator: "Generator Pola Bilangan", latihan: "Latihan Soal", evaluasi: "Evaluasi",
+  generator: "Generator Pola Bilangan", latihan: "Latihan Soal", rmt: "Pemecahan Masalah", tanya: "Tanya AI", evaluasi: "Evaluasi",
   nilai: "Hasil Belajar", pengaturan: "Pengaturan", masuk: "Masuk",
 };
 
 const TAB = [
-  { id: "beranda", label: "Beranda", ikon: "beranda", cocok: ["beranda", "kalkulator", "generator", "latihan", "evaluasi"] },
+  { id: "beranda", label: "Beranda", ikon: "beranda", cocok: ["beranda", "kalkulator", "generator", "latihan", "rmt", "tanya", "evaluasi"] },
   { id: "materi", label: "Materi", ikon: "buku", cocok: ["materi", "modul"] },
   { id: "nilai", label: "Nilai", ikon: "piala", cocok: ["nilai"] },
   { id: "pengaturan", label: "Pengaturan", ikon: "gerigi", cocok: ["pengaturan"] },

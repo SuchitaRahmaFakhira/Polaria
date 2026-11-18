@@ -37,6 +37,23 @@ export const MODUL = [
     sub: "Kenali bilangan ganjil dan genap.",
     slide: [
       {
+        "jenis": "tujuan",
+        "judul": "Setelah modul ini, kamu bisa…",
+        "poin": [
+          "Membedakan bilangan ganjil dan genap.",
+          "Menjelaskan alasannya dengan sisa pembagian.",
+          "Memakai angka satuan sebagai cara cepat."
+        ]
+      },
+      {
+        "jenis": "makna",
+        "judul": "Dari keseharian ke matematika",
+        "paragraf": [
+          "Kamu sering melihatnya: nomor rumah di kiri dan kanan jalan.",
+          "Sekarang kita beri nama dan aturan yang pasti."
+        ]
+      },
+      {
         jenis: "teks",
         judul: "Bilangan genap",
         paragraf: ["Bilangan genap habis dibagi 2.", "Sisa pembagiannya 0."],
@@ -63,6 +80,7 @@ export const MODUL = [
       {
         jenis: "contoh",
         soal: "Apakah 2.357 bilangan ganjil atau genap?",
+        fase: ["Input", "Elaborasi", "Output"],
         langkah: ["Lihat angka satuannya: 7.", "7 termasuk 1, 3, 5, 7, 9.", "Jadi 2.357 adalah bilangan ganjil."],
       },
       {
@@ -84,9 +102,26 @@ export const MODUL = [
         penjelasan: "Sisanya 0, jadi 0 habis dibagi 2. Itu ciri bilangan genap.",
       },
       {
+        "jenis": "transendensi",
+        "judul": "Aturan ini juga berlaku di…",
+        "paragraf": [
+          "Ganjil-genap dipakai untuk membagi giliran dan mengatur kendaraan.",
+          "Aturannya selalu sama: lihat sisa pembagian dengan 2."
+        ],
+        "contoh": [
+          "Nomor rumah",
+          "Kursi bioskop",
+          "Plat ganjil-genap"
+        ]
+      },
+      {
         jenis: "ringkasan",
         judul: "Ringkasan",
         poin: ["Genap: habis dibagi 2 (sisa 0).", "Ganjil: sisa 1 jika dibagi 2.", "Cara cepat: lihat angka satuannya."],
+      },
+      {
+        "jenis": "refleksi",
+        "pertanyaan": "Dengan kalimatmu sendiri: bagaimana cara membedakan bilangan ganjil dan genap?"
       },
     ],
   },
@@ -95,6 +130,23 @@ export const MODUL = [
     judul: "2. Pola & Rumus Un",
     sub: "Temukan suku ke-n pola genap dan ganjil.",
     slide: [
+      {
+        "jenis": "tujuan",
+        "judul": "Setelah modul ini, kamu bisa…",
+        "poin": [
+          "Menemukan aturan pola genap dan ganjil.",
+          "Memakai rumus Un untuk mencari suku ke-n.",
+          "Mencari letak suku dari sebuah bilangan."
+        ]
+      },
+      {
+        "jenis": "makna",
+        "judul": "Kenapa perlu rumus?",
+        "paragraf": [
+          "Menulis 2, 4, 6, … sampai suku ke-100 itu melelahkan.",
+          "Rumus membuatmu langsung tahu suku mana pun."
+        ]
+      },
       {
         jenis: "teks",
         judul: "Istilah penting",
@@ -116,6 +168,7 @@ export const MODUL = [
       {
         jenis: "contoh",
         soal: "Tentukan suku ke-25 dari pola 1, 3, 5, 7, …",
+        fase: ["Elaborasi", "Output", "Output", "Output"],
         langkah: [
           `Pola ini ganjil. Rumusnya Un = 2n ${M} 1.`,
           `Ganti n dengan 25: U25 = 2 × 25 ${M} 1.`,
@@ -126,6 +179,7 @@ export const MODUL = [
       {
         jenis: "contoh",
         soal: "Bilangan ganjil 35 adalah suku ke berapa?",
+        fase: ["Elaborasi", "Output", "Output"],
         langkah: [`Pola ganjil: Un = 2n ${M} 1.`, `35 = 2n ${M} 1, jadi 2n = 36.`, "n = 36 ÷ 2 = 18. Jadi 35 adalah suku ke-18."],
       },
       {
@@ -148,9 +202,26 @@ export const MODUL = [
         penjelasan: `Genap ke-n adalah 2n. Ganjil ke-n tepat 1 di bawahnya, yaitu 2n ${M} 1.`,
       },
       {
+        "jenis": "transendensi",
+        "judul": "Pola ini juga ada di…",
+        "paragraf": [
+          "Nomor kursi, nomor rumah, dan lompatan bilangan memakai aturan yang sama.",
+          "Setiap pola yang bertambah 2 bisa dicari dengan 2n atau 2n − 1."
+        ],
+        "contoh": [
+          "Nomor kursi",
+          "Nomor rumah",
+          "Tangga bilangan"
+        ]
+      },
+      {
         jenis: "ringkasan",
         judul: "Ringkasan",
         poin: ["Pola genap: 2, 4, 6, … → Un = 2n.", `Pola ganjil: 1, 3, 5, … → Un = 2n ${M} 1.`, "Kerjakan perkalian dulu, baru pengurangan."],
+      },
+      {
+        "jenis": "refleksi",
+        "pertanyaan": "Kenapa rumus pola ganjil 2n − 1, bukan 2n? Jelaskan dengan kalimatmu."
       },
     ],
   },
@@ -159,6 +230,23 @@ export const MODUL = [
     judul: "3. Jumlah Suku Sn",
     sub: "Hitung jumlah n suku pertama.",
     slide: [
+      {
+        "jenis": "tujuan",
+        "judul": "Setelah modul ini, kamu bisa…",
+        "poin": [
+          "Membedakan satu suku (Un) dan jumlah suku (Sn).",
+          "Memakai Sn = n² dan Sn = n(n + 1).",
+          "Menyelesaikan soal cerita tentang jumlah."
+        ]
+      },
+      {
+        "jenis": "makna",
+        "judul": "Menjumlah tanpa lelah",
+        "paragraf": [
+          "Menjumlah 1 + 3 + 5 + … sampai 20 suku itu lama.",
+          "Susunan titik membantumu melihat jalan pintasnya."
+        ]
+      },
       {
         jenis: "teks",
         judul: "Un dan Sn berbeda",
@@ -179,11 +267,13 @@ export const MODUL = [
       {
         jenis: "contoh",
         soal: "Berapa jumlah 10 bilangan ganjil pertama?",
+        fase: ["Input", "Elaborasi", "Output"],
         langkah: ["Yang ditanya jumlah, jadi pakai Sn.", "Pola ganjil: Sn = n².", "S10 = 10² = 10 × 10 = 100."],
       },
       {
         jenis: "contoh",
         soal: "Berapa jumlah 12 bilangan genap pertama?",
+        fase: ["Elaborasi", "Output", "Output"],
         langkah: ["Pola genap: Sn = n(n + 1).", "S12 = 12 × (12 + 1) = 12 × 13.", "12 × 13 = 156. Jadi S12 = 156."],
       },
       {
@@ -212,9 +302,26 @@ export const MODUL = [
         penjelasan: "U3 pola ganjil = 5 (satu suku), sedangkan S3 = 1 + 3 + 5 = 9 (jumlah).",
       },
       {
+        "jenis": "transendensi",
+        "judul": "Jumlah pola juga ada di…",
+        "paragraf": [
+          "Tabungan yang bertambah tetap, susunan ubin, dan kursi seluruhnya.",
+          "Kalau yang ditanya total, pakai Sn."
+        ],
+        "contoh": [
+          "Tabungan",
+          "Susunan ubin",
+          "Kursi seluruhnya"
+        ]
+      },
+      {
         jenis: "ringkasan",
         judul: "Ringkasan",
         poin: ["Ganjil: Sn = n².", "Genap: Sn = n(n + 1).", "Baca soalnya: ditanya satu suku (Un) atau jumlah (Sn)?"],
+      },
+      {
+        "jenis": "refleksi",
+        "pertanyaan": "Apa beda Un dan Sn? Kapan kamu memakai masing-masing?"
       },
     ],
   },

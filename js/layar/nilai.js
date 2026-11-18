@@ -17,7 +17,7 @@ const SARAN = {
 };
 
 export function layarNilai() {
-  const { latihan, evaluasi } = baca();
+  const { latihan, evaluasi, rmt = [] } = baca();
 
   const kotakNilai = (jenis, label) =>
     h(
@@ -88,5 +88,40 @@ export function layarNilai() {
         )
       : h("div", { class: "kartu tengah tumpuk" }, h("p", { class: "redup" }, "Belum ada latihan. Yuk mulai!"), h("a", { class: "tombol", href: "#/latihan" }, "Mulai Latihan")),
     terlemah ? kotakIngat("Saran belajar", h("p", {}, SARAN[terlemah[0]])) : null,
+    kartuRmt(rmt),
+  );
+}
+
+// Diagnosis fase RMT: tahap mana yang paling sering butuh petunjuk (Input/Elaborasi/Output).
+const TAHAP_RMT = [
+  ["input", "Pahami (Input)", "Latih membaca soal: tulis dulu apa yang diketahui dan apa yang ditanya."],
+  ["elaborasi", "Rencanakan (Elaborasi)", "Sebelum menghitung, tentukan jenis pola dan rumusnya. Buka Kartu Rumus bila perlu."],
+  ["output", "Kerjakan (Output)", "Tulis langkah substitusi satu per satu dan kerjakan perkalian lebih dulu."],
+  ["refleksi", "Renungkan (Refleksi)", "Biasakan memeriksa jawaban dengan n = 1 dan menjelaskan caramu."],
+];
+
+function kartuRmt(rmt) {
+  if (!rmt.length) {
+    return h("div", { class: "kartu tengah tumpuk" }, h("p", { class: "redup" }, "Belum ada sesi Pemecahan Masalah RMT."), h("a", { class: "tombol-garis", href: "#/rmt" }, "Coba sekarang"));
+  }
+  const total = Object.fromEntries(TAHAP_RMT.map(([id]) => [id, 0]));
+  rmt.forEach((s) => TAHAP_RMT.forEach(([id]) => (total[id] += s.tahap?.[id]?.petunjuk || 0)));
+  const maks = Math.max(1, ...Object.values(total));
+  const terberat = TAHAP_RMT.reduce((a, b) => (total[b[0]] > total[a[0]] ? b : a));
+  return h(
+    "div",
+    { class: "kartu tumpuk" },
+    h("p", { class: "tebal" }, "Pemecahan Masalah RMT"),
+    h("p", { class: "kecil redup" }, `${rmt.length} soal terpecahkan · petunjuk yang dipakai per tahap`),
+    TAHAP_RMT.map(([id, label]) =>
+      h(
+        "div",
+        { class: "batang-baris" },
+        h("span", { class: "kecil" }, label.split(" ")[0]),
+        h("div", { class: "progres kuning" }, h("i", { style: { width: `${(total[id] / maks) * 100}%` } })),
+        h("span", { class: "kecil redup" }, total[id]),
+      ),
+    ),
+    total[terberat[0]] > 0 ? kotakIngat(`Paling butuh bantuan: ${terberat[1]}`, h("p", {}, terberat[2])) : h("p", { class: "kecil redup" }, "Hebat, kamu menyelesaikan semua tahap tanpa petunjuk!"),
   );
 }

@@ -120,6 +120,21 @@ Kode fitur (F-xx) merujuk ke [PRD.md](../PRD.md#6-kebutuhan-fungsional).
 
 ---
 
+## 4b. Kerangka Kedua: Rigorous Mathematical Thinking (RMT)
+
+Selain CLT, desain memakai model RMT (Kinard & Kozulin). Temuan wawancara dipetakan ke unsur RMT berikut:
+
+| Temuan | Unsur RMT | Fitur |
+|---|---|---|
+| Sulit membedakan pola & memilih rumus (IL01, K03) | Fungsi kognitif Elaborasi (membandingkan, mengklasifikasi); alat psikologis rumus & tabel | F-19 tahap Rencanakan, F-20 |
+| Bingung apa yang ditanya: suku atau jumlah (IL05) | Fungsi kognitif Input (persepsi jelas, ketepatan data); analisis tugas | F-19 tahap Pahami, diagnosis `input_ditanya` |
+| Kesulitan hitung bilangan besar (IL04, EL05) | Fungsi kognitif Output (presisi, hindari coba-coba) | F-19 tahap Kerjakan (langkah wajib ditulis) |
+| Tertinggal karena penjelasan cepat (EL01) | MLE: mediasi bertahap, resiprositas | Tutor satu pertanyaan per giliran, siswa mengatur kecepatan |
+| Contoh soal & soal mirip membantu (GL01, GL03, GL05) | MLE: transendensi; konsep sehari-hari → ilmiah | F-20 Makna & Transendensi, soal cerita |
+| Memeriksa ulang jawaban (GL02) | Validasi; metakognisi | F-19 tahap Renungkan, F-21 jurnal |
+| Menjelaskan ke teman membantu (GL04) | Bahasa matematika sebagai alat berpikir | "Jelaskan caramu ke tutor" |
+| Data untuk tahap Evaluation | Asesmen dinamis (*sandwich* & *cake*) | Pre/post-test, petunjuk bertingkat, tabel `interaksi_tutor` |
+
 ## 5. Keterbatasan dan Rekomendasi
 
 - **Baru satu responden (S01).** Temuan belum dapat digeneralisasi. Disarankan menambah 3–5 siswa dengan kemampuan berbeda, serta mewawancarai guru matematika, sebelum desain difinalkan.

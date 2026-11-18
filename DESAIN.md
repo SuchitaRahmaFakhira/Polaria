@@ -548,3 +548,96 @@ Jumlah petunjuk dicatat di kolom `jumlah_petunjuk` (lihat [PRD.md §9](PRD.md#9-
 | Ganjil | 1, 3, 5, 7, … | Un = 2n − 1 | Sn = n² | n = (b + 1) ÷ 2 |
 
 Cek cepat: n = 5 → genap U5 = 10, S5 = 30 (2+4+6+8+10); ganjil U5 = 9, S5 = 25 (1+3+5+7+9). Bilangan 17 → ganjil, suku ke-9.
+
+---
+
+## 8. Rigorous Mathematical Thinking (RMT) dan Tutor
+
+Polaria memakai model **Rigorous Mathematical Thinking** (Kinard & Kozulin), yang memadukan alat psikologis dan konsep ilmiah dari Vygotsky dengan *Mediated Learning Experience* (MLE) dan fungsi kognitif dari Feuerstein. CLT (§1) mengatur *seberapa banyak* yang disajikan; RMT mengatur *urutan berpikir* dan *cara membimbing*.
+
+### 8.1 Pemetaan RMT → fitur
+
+| Unsur RMT | Wujud di Polaria |
+|---|---|
+| Fungsi kognitif Input – Elaborasi – Output | 4 tahap mode RMT: **Pahami (Input)** → **Rencanakan (Elaborasi)** → **Kerjakan (Output)** → **Renungkan (Refleksi/Validasi)** |
+| *Learning Activity*: analisis tugas, perencanaan, refleksi | Pahami = analisis tugas; Rencanakan = perencanaan tindakan; Renungkan = refleksi + jurnal |
+| Alat psikologis: simbol, garis bilangan, tabel, rumus, bahasa matematika | Tahap Rencanakan: siswa memilih alat (tabel, garis bilangan, kartu rumus) yang langsung tampil; tutor mengarahkan ke representasi |
+| MLE: intensionalitas & resiprositas | Tutor menyebut tujuan setiap tahap, lalu menunggu dan menanggapi jawaban siswa (termasuk pesan bebas) |
+| MLE: makna | Slide **Makna** di awal modul: dari keseharian (nomor rumah, tabungan) ke konsep ilmiah (Un, Sn) |
+| MLE: transendensi | Slide **Transendensi** di akhir modul dan pertanyaan tahap Renungkan: "Di mana lagi aturan ini berlaku?" |
+| Asesmen dinamis *sandwich* | Pre-test → materi → post-test (§3.10) |
+| Asesmen dinamis *cake* | Petunjuk bertingkat 1–3 yang naik bila siswa masih keliru |
+| Siklus Representasi – Manipulasi – Validasi | Rencanakan (representasi) → Kerjakan (manipulasi) → Renungkan (validasi dengan substitusi n = 1) |
+| Hindari *trial-and-error*, presisi bahasa | Kerjakan wajib menulis langkah substitusi sebelum jawaban akhir |
+| Metakognisi, jurnal RMT | Jurnal refleksi di akhir modul dan akhir sesi RMT |
+| Diagnosis fase kognitif | Kesulitan dicatat per tahap; layar Nilai menunjukkan tahap yang paling butuh bantuan beserta saran |
+
+### 8.2 Prinsip tutor
+
+| Prinsip | Penerapan | Kaitan |
+|---|---|---|
+| Tidak memberi jawaban akhir | Prompt melarang; **penyaring Python** mengganti respons yang memuat jawaban akhir dengan petunjuk bawaan | RMT (pembimbing proses berpikir) |
+| Benar/salah diputuskan kode | `periksa_tahap` di Python; AI hanya merangkai kalimat | Akurasi |
+| Petunjuk sesuai kesulitan | Diagnosis: `input_data`, `input_ditanya`, `konsep_pola`, `konsep_rumus`, `hitung`, `refleksi`; tingkat 1 = arahkan perhatian, 2 = sebut konsep/alat, 3 = satu langkah parsial | IL, *cake* |
+| Beban penyajian rendah | Maksimal 3 kalimat + 1 pertanyaan per giliran; satu gelembung tutor saja yang tampil | EL03, DS03 |
+| Membangun pemahaman | Tutor selalu meminta alasan atau penjelasan siswa | GL04 (*self-explanation*) |
+| Tetap jalan tanpa AI | Bila Gemini tidak tersedia, petunjuk bawaan (label "Petunjuk") dipakai; label "AI" bila dari Gemini | Keandalan |
+| Privasi & keamanan | Nama siswa tidak dikirim ke AI; teks soal disusun ulang di server; pesan siswa diperlakukan sebagai data, bukan perintah | Perlindungan anak |
+
+### 8.3 Wireframe: Pemecahan Masalah RMT
+
+```
+┌──────────────────────────────┐
+│ ‹    Pemecahan Masalah   [📖]│
+│  ✔        ②        3      4  │
+│ Pahami Rencanakan Kerjakan Renungkan
+│ ┌──────────────────────────┐ │
+│ ▌ Soal literasi            │ │
+│ ▌ Dimas menabung Rp2.000,  │ │
+│ ▌ Rp4.000, … Berapa ribu   │ │
+│ ▌ rupiah setelah 7 hari?   │ │
+│ └──────────────────────────┘ │
+│ ┌──────────────────────────┐ │
+│ │ 2. Rencanakan            │ │
+│ │ Fase Elaborasi · tujuan… │ │
+│ │ Ini pola bilangan apa?   │ │
+│ │ (A) Genap        ◉       │ │
+│ │ (B) Ganjil       ○       │ │
+│ │ Alat bantu: [Tabel]      │ │
+│ │ [Garis bilangan] [Rumus] │ │
+│ │ ▢▢▢▢▢▢▢▢▢▢ (alat tampil)  │ │
+│ │ Rumus mana yang tepat?   │ │
+│ │ (A) Sn = n(n + 1) ○ …    │ │
+│ └──────────────────────────┘ │
+│ ┌──────────────────────────┐ │
+│ │ (💡) Tutor      [AI]     │ │
+│ │ Yang ditanya jumlah 7    │ │
+│ │ suku pertama.            │ │
+│ │ Rumus mana yang cocok?   │ │  ← satu pertanyaan, ungu tebal
+│ └──────────────────────────┘ │
+│ [💡 Petunjuk 1/3] ( Periksa )│
+│ ▸ Jelaskan caramu ke tutor   │  ← dapat dibuka
+└──────────────────────────────┘
+```
+Setelah tahap lulus, tombol berubah menjadi "Lanjut ke Kerjakan". Layar akhir menampilkan "Perjalanan berpikirmu" (coba & petunjuk per tahap) dan jurnal refleksi.
+
+### 8.4 Lembar Tanya Tutor (dari Latihan)
+```
+┌──────────────────────────────┐
+│ Tanya Tutor            [ × ] │
+│ Suku ke-25 dari pola …       │
+│ ┌──────────────────────────┐ │
+│ │ (💡) Tutor   [Petunjuk]  │ │
+│ │ Pola ini genap atau      │ │
+│ │ ganjil? …                │ │
+│ └──────────────────────────┘ │
+│            ┌───────────────┐ │
+│            │ aku pakai 2n  │ │  ← pesan siswa
+│            └───────────────┘ │
+│ [ Jelaskan caramu…        ]  │
+│ [Petunjuk berikutnya] (Kirim)│
+└──────────────────────────────┘
+```
+
+### 8.5 Slide RMT di modul
+Urutan modul 1–3 sekarang: **Tujuan** → **Makna** → konsep → contoh (langkah berlabel fase) → contoh dikosongkan → latihan → "Kenapa?" → **Transendensi** → ringkasan → **Refleksi** (jurnal, boleh dilewati). Setiap slide tetap memuat paling banyak 3 kalimat.

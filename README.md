@@ -28,7 +28,10 @@ Wawancara dengan siswa kelas VIII menunjukkan kesulitan terbesar adalah **membed
 - **Generator Pola Bilangan**: buat pola genap/ganjil, lihat rumus Un dan jumlah Sn
 - **Latihan Soal** 3 level dengan soal acak, petunjuk bertahap, dan pembahasan
 - **Evaluasi** pre-test & post-test
-- **Hasil Belajar**: perkembangan skor per level dan per jenis soal
+- **Tanya AI Matematika**: ketik pertanyaan matematika apa pun, tutor AI (Gemini) menjelaskan materi dan membimbing langkah penyelesaian
+- **Pemecahan Masalah RMT** bersama **tutor AI (Gemini)**: soal cerita dikerjakan lewat tahap Pahami → Rencanakan → Kerjakan → Renungkan; tutor memberi petunjuk bertahap tanpa memberi jawaban akhir
+- Lapisan *Rigorous Mathematical Thinking* di modul (tujuan, makna, transendensi) dan **jurnal refleksi**
+- **Hasil Belajar**: perkembangan skor per level, per jenis soal, dan tahap RMT yang paling butuh bantuan
 - Bisa **dipasang di HP** dan tetap bisa belajar saat sinyal putus
 
 ## Teknologi
@@ -39,6 +42,7 @@ Wawancara dengan siswa kelas VIII menunjukkan kesulitan terbesar adalah **membed
 | Logika matematika (API) | **Python 3.12 + FastAPI** |
 | Database & login | [Supabase](https://supabase.com) (Postgres + anonymous sign-in) |
 | Hosting | [Vercel](https://vercel.com) (file statis + Python serverless function) |
+| Tutor AI | Google Gemini API (dipanggil hanya dari server Python) |
 
 ## Cara Memasang di HP (untuk siswa)
 
@@ -71,6 +75,22 @@ Aplikasi akan terbuka layar penuh seperti aplikasi biasa, tanpa Play Store/App S
 
 **Bagaimana nilainya sampai ke aplikasi?** Browser tidak bisa membaca `.env`. API Python membacanya lalu menyerahkan URL dan kunci publik lewat `/api/config`. *Anon key* memang aman dipakai di browser karena data dilindungi RLS. **Jangan** isi `service_role` / *secret key*: API akan menolaknya dan aplikasi kembali ke mode lokal.
 
+### 1b. Aktifkan tutor AI Gemini (opsional)
+1. Buat API key di [Google AI Studio](https://aistudio.google.com/apikey).
+2. Isi di `.env`:
+   ```env
+   GEMINI_API_KEY=isi-kunci-gemini
+   GEMINI_MODEL=gemini-3.5-flash-lite
+   ```
+   Kunci ini **rahasia**: hanya dibaca server Python dan tidak pernah dikirim ke browser.
+3. Tanpa kunci ini, tutor RMT memakai petunjuk bawaan (label "Petunjuk") dan Tanya AI menampilkan pesan "belum aktif". Dengan kunci, keduanya memakai Gemini (label "AI").
+4. Cek cepat: buka `/api/config`. Nilai `"ai_aktif": true` berarti server sudah membaca kuncinya (kunci itu sendiri tidak pernah ditampilkan).
+
+> ⚠️ **Syarat Gemini API:** Google mensyaratkan pengguna berusia 18 tahun ke atas dan melarang pemakaian di layanan yang *"likely to be accessed by individuals under the age of 18"*. Sasaran Polaria adalah siswa SMP; risiko ini diterima pengembang (lihat PRD §12). Nama siswa tidak pernah dikirim ke Gemini.
+
+### 1c. Perbarui database
+Jika `supabase/schema.sql` sudah pernah dijalankan, jalankan lagi seluruh isinya. Skrip ini aman diulang dan akan menambah tabel `interaksi_tutor` dan `jurnal_refleksi`.
+
 ### 2. Jalankan lokal
 Butuh Python 3.12.
 ```bash
@@ -93,7 +113,7 @@ pytest
 1. Unggah proyek ke repositori GitHub.
 2. Di Vercel: **Add New → Project**, pilih repositori.
 3. Framework preset: **Other**; kosongkan *Build Command*. Vercel otomatis memasang Python dari `requirements.txt` untuk `api/index.py`.
-4. Buka **Settings → Environment Variables**, tambahkan `SUPABASE_URL` dan `SUPABASE_ANON_KEY` dengan nilai yang sama seperti di `.env` (file `.env` sendiri tidak diunggah).
+4. Buka **Settings → Environment Variables**, tambahkan `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GEMINI_API_KEY`, dan `GEMINI_MODEL` dengan nilai yang sama seperti di `.env` (file `.env` sendiri tidak diunggah). Setelah mengubah variabel, lakukan **Redeploy**.
 5. Klik **Deploy**. Setiap `git push` memperbarui situs. Alamat Vercel sudah HTTPS, syarat agar aplikasi bisa dipasang di HP.
 
 ## Struktur Folder
@@ -105,12 +125,14 @@ css/style.css
 js/          app.js (router), api.js, supabase.js, cache.js, data.js, progres.js,
              komponen.js, ikon.js, util.js, tema.js, pasang.js, config.js
 js/layar/    masuk, beranda, materi, modul, kalkulator, generator, latihan,
-             evaluasi, nilai, pengaturan
+             rmt, evaluasi, nilai, pengaturan
+js/tutor.js                tutor bersama (layar RMT & Latihan)
 js/materi/konten.js        isi pemanasan & modul 1–3
 js/evaluasi/soal-tetap.js  15 soal pre-test/post-test
 api/index.py               FastAPI (endpoint /api/*)
-api/_logika/               pola.py, kalkulator.py, soal.py, periksa.py
-tests/                     pytest (24 tes)
+api/_logika/               pola.py, kalkulator.py, soal.py, periksa.py, rmt.py, konfigurasi.py
+api/_layanan/gemini.py     klien Gemini (satu-satunya panggilan jaringan)
+tests/                     pytest (75 tes)
 supabase/schema.sql        tabel + Row Level Security
 assets/ikon/               ikon PWA
 docs/                      ANALISIS-KEBUTUHAN.md, referensi-tampilan.jpg

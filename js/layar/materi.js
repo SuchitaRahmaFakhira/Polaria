@@ -37,5 +37,6 @@ export function layarMateri() {
     kotakIngat("Belajar bertahap", h("p", {}, "Mulai dari pemanasan. Modul berikutnya terbuka setelah modul sebelumnya selesai. Kamu bisa mengulang kapan saja.")),
     h("div", { class: "menu daftar-modul" }, daftar),
     h("button", { class: "tombol-garis", type: "button", onclick: bukaKartuRumus }, ikon("buku", 20), "Buka Kartu Rumus"),
+    h("a", { class: "tombol-garis", href: "#/tanya" }, ikon("tanda_tanya", 20), "Bingung? Tanya AI"),
   );
 }

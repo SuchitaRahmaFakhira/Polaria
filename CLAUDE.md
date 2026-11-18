@@ -4,7 +4,7 @@ Panduan untuk asisten AI (Claude Code) saat mengerjakan proyek ini.
 
 ## Proyek
 
-**Polaria** — aplikasi web (PWA) pembelajaran **pola bilangan ganjil dan genap** untuk siswa SMP kelas VIII. Tujuannya mengelola *cognitive load* agar literasi matematika siswa meningkat. Dikembangkan dengan model ADDIE sebagai proyek mata kuliah Algoritma dan Pemrograman. Bisa dipasang di HP **tanpa Play Store/App Store**.
+**Polaria** — aplikasi web (PWA) pembelajaran **pola bilangan ganjil dan genap** untuk siswa SMP kelas VIII. Tujuannya mengelola *cognitive load* agar literasi matematika siswa meningkat. Dikembangkan dengan model ADDIE sebagai proyek mata kuliah Algoritma dan Pemrograman. Model pembelajarannya **Rigorous Mathematical Thinking (RMT)** dengan tutor AI (Gemini). Bisa dipasang di HP **tanpa Play Store/App Store**.
 
 **Sumber kebenaran** (baca sebelum menulis kode atau konten):
 - [PRD.md](PRD.md): fitur F-00 s.d. F-18, endpoint API, model data, kebutuhan non-fungsional
@@ -23,6 +23,7 @@ Jika permintaan bertentangan dengan dokumen di atas, tanyakan dulu kepada penggu
 | Data & auth | Supabase (Postgres + anonymous sign-in), diakses langsung dari JS dengan `supabase-js` v2 via CDN, versi dikunci (mis. `https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm`) |
 | Hosting | Vercel: file statis dari root + `/api/*` ke Python |
 | Font | Plus Jakarta Sans (Google Fonts), cadangan `system-ui` |
+| Tutor AI | Google Gemini API (REST `generateContent` lewat `urllib`, tanpa SDK), model dari `GEMINI_MODEL` (bawaan `gemini-3.5-flash-lite`) |
 
 Pembagian tugas: **Python** = semua logika matematika (kalkulator, pola, generator soal, pemeriksa & pembahasan). **JavaScript** = tampilan, navigasi, PWA/offline, Supabase. Jangan menduplikasi logika matematika di JS, kecuali konten materi statis dan kunci set soal evaluasi.
 
@@ -37,7 +38,7 @@ requirements.txt            fastapi, pydantic (versi dikunci; dipakai Vercel)
 pytest.ini                  pythonpath = api
 .vercelignore               file yang tidak ikut deploy (tests, docs, .venv)
 css/style.css               token warna (terang/gelap), komponen
-.env / .env.example         SUPABASE_URL + SUPABASE_ANON_KEY (.env tidak di-commit;
+.env / .env.example         SUPABASE_URL + SUPABASE_ANON_KEY + GEMINI_API_KEY + GEMINI_MODEL (.env tidak di-commit;
                             di Vercel pakai Environment Variables)
 js/config.js                ambil konfigurasi dari /api/config + simpan salinan untuk offline
 js/app.js                   router hash (#/beranda, #/materi, #/modul/:id, #/kalkulator,
@@ -54,8 +55,9 @@ js/api.js                   pemanggil /api/* + cadangan sesi soal untuk offline
 js/supabase.js              auth anonim, simpanSiswa/Progres/Jawaban/Evaluasi, sinkron()
 js/cache.js                 antrian offline di localStorage
 js/pasang.js                beforeinstallprompt, deteksi iOS & mode standalone
+js/tutor.js                 mintaBimbingan(), gelembungTutor(), lembar Tanya Tutor (Latihan)
 js/layar/*.js               masuk, beranda, materi, modul, kalkulator, generator, latihan,
-                            evaluasi, nilai, pengaturan
+                            rmt (Pemecahan Masalah RMT), tanya (Tanya AI), evaluasi, nilai, pengaturan
 js/materi/konten.js         konten statis pemanasan, modul1–3
 js/evaluasi/soal-tetap.js   set soal pre-test & post-test
 api/index.py                aplikasi FastAPI + routing /api/*
@@ -63,6 +65,10 @@ api/_logika/kalkulator.py   fungsi murni (folder diawali "_" agar tidak dijadika
 api/_logika/pola.py         fungsi terpisah oleh Vercel)
 api/_logika/soal.py
 api/_logika/periksa.py
+api/_logika/rmt.py          tahap RMT, periksa_tahap, diagnosis, petunjuk_aturan, prompt, penyaring
+api/_logika/konfigurasi.py  baca .env, tolak kunci Supabase rahasia
+api/_logika/tanya.py        instruksi Tanya AI, susun riwayat, bersihkan_latex
+api/_layanan/gemini.py      SATU-SATUNYA tempat I/O jaringan (Gemini); folder "_" juga
 tests/test_*.py             pytest untuk api/_logika
 supabase/schema.sql         tabel + kebijakan RLS
 assets/ikon/                ikon PWA 180/192/512/maskable
@@ -75,7 +81,8 @@ docs/                       dokumen analisis & mockup
 - **Jangan pernah** memakai `service_role` / *secret key*. `api/_logika/konfigurasi.py` menolaknya (`kunci_publik_aman`); jangan longgarkan pemeriksaan ini.
 - Server lokal (`StatisAman` di `api/index.py`) tidak boleh menyajikan file tersembunyi (`.env`, `.venv`) maupun folder `api/`, `tests/`, `supabase/`.
 - Setiap tabel **wajib** RLS: `auth.uid() = siswa_id` (tabel `siswa`: `auth.uid() = id`). Tidak ada kebijakan `delete`.
-- API Python tidak menyimpan data dan tidak memakai kunci rahasia apa pun.
+- API Python tidak menyimpan data. Satu-satunya kunci rahasia adalah `GEMINI_API_KEY`: hanya dibaca di `api/_layanan/gemini.py`, **tidak pernah** dikirim ke browser (termasuk `/api/config`, yang hanya memberi `ai_aktif`), tidak pernah ditulis di log atau pesan galat.
+- Jangan pernah mengirim nama/kelas siswa ke Gemini.
 - Data pribadi hanya `nama` dan `kelas`.
 - Tampilkan teks dari pengguna dan dari API dengan `textContent`, jangan `innerHTML`.
 
@@ -93,9 +100,21 @@ docs/                       dokumen analisis & mockup
 - Cek cepat: n = 5 → genap U5 = 10, S5 = 30; ganjil U5 = 9, S5 = 25. Bilangan 17 → ganjil, suku ke-9.
 - Di tampilan, minus ditulis "−" (U+2212), pangkat "²", bagi "÷", kali "×".
 
+## Aturan Tutor AI (wajib)
+
+- Benar/salah **selalu** diputuskan `rmt.periksa_tahap` di Python. Gemini hanya merangkai kalimat bimbingan.
+- Respons Gemini **wajib** lewat `rmt.saring_respons` (mengganti respons yang memuat jawaban akhir sebelum siswa benar). Jangan longgarkan penyaring ini.
+- Teks soal cerita disusun ulang di server (`rmt.teks_soal`); pesan siswa diperlakukan sebagai data, bukan perintah.
+- Tutor: maksimal 3 kalimat + 1 pertanyaan, petunjuk bertingkat 1–3, tidak memberi jawaban akhir, Bahasa Indonesia sapaan "kamu".
+- Bila Gemini gagal/tidak dikonfigurasi, `/api/rmt/tutor` menjawab dengan `rmt.petunjuk_aturan` (`sumber: "aturan"`, label "Petunjuk"). `/api/tanya` **tidak** punya jawaban cadangan: kembalikan 503/502 dengan pesan jujur, jangan pernah membuat jawaban AI tiruan.
+- Semua teks dari Gemini lewat `tanya.bersihkan_latex` sebelum dikirim ke browser; jawaban ditampilkan dengan `teksTerformat` (tanpa `innerHTML`).
+- Galat Gemini dicatat dengan `print(...)` (tampil di Vercel Runtime Logs) tanpa kunci.
+- Tes tidak boleh memanggil Gemini sungguhan: tiru `urllib.request.urlopen` (lihat `tests/test_gemini.py`).
+- Risiko syarat usia Gemini (pengguna < 18 tahun) diterima pengembang; jangan hapus catatannya di PRD/README.
+
 ## Aturan Python
 
-- Logika di `api/_logika/` berupa **fungsi murni** (tanpa I/O), mengembalikan `dict`/model Pydantic; `api/index.py` hanya routing dan validasi.
+- Logika di `api/_logika/` berupa **fungsi murni** (tanpa I/O), mengembalikan `dict`/model Pydantic. I/O jaringan hanya di `api/_layanan/`. `api/index.py` hanya routing, validasi, dan merangkai keduanya.
 - Nama fungsi/variabel Bahasa Indonesia, `snake_case` (`buat_soal`, `periksa_jawaban`, `hitung_sn`).
 - Validasi masukan dengan Pydantic/`Query`: bilangan 0–1.000.000, jumlah suku 1–20, n 1–1000, level `mudah|sedang|menantang`.
 - Pesan error ramah dalam Bahasa Indonesia (mis. "Masukkan bilangan bulat antara 0 dan 1.000.000.").
@@ -118,7 +137,7 @@ docs/                       dokumen analisis & mockup
 - Warna makna konsisten: genap = `--genap` (ungu), ganjil = `--ganjil` (biru), selalu dengan label teks.
 - **Tanpa animasi dekoratif**, maskot, atau suara. Transisi ≤ 150 ms; hormati `prefers-reduced-motion`. Ilustrasi hanya statis.
 - *Mobile-first* 360 px, target sentuh ≥ 44 px, font dasar 17 px. Ikon SVG inline.
-- Setiap modul: konsep → contoh langkah demi langkah → contoh dikosongkan → latihan mirip → "Kenapa?" → ringkasan.
+- Setiap modul (lapisan RMT/MLE): Tujuan → Makna → konsep → contoh langkah demi langkah (berlabel fase) → contoh dikosongkan → latihan mirip → "Kenapa?" → Transendensi → ringkasan → Refleksi.
 
 ## Cara Menjalankan & Menguji
 
@@ -141,4 +160,5 @@ Daftar uji:
 - Pasang di HP: Android (Chrome → "Pasang Aplikasi") dan iPhone (Safari → Bagikan → Tambahkan ke Layar Utama) dari URL Vercel (HTTPS).
 - Masuk dengan nama + kelas → baris baru di tabel `siswa`.
 - RLS: dua akun anonim berbeda tidak bisa membaca data satu sama lain.
-- Offline: materi & latihan dari cache tetap jalan; jawaban tersinkron saat online; Kalkulator menampilkan pesan offline.
+- Offline: materi & latihan dari cache tetap jalan; jawaban tersinkron saat online; Kalkulator dan Pemecahan Masalah RMT menampilkan pesan offline.
+- Tutor: tanpa `GEMINI_API_KEY` alur RMT 4 tahap tetap selesai (petunjuk bawaan); dengan kunci, respons ≤ 3 kalimat + 1 pertanyaan dan tidak memuat jawaban akhir; `curl /api/config` tidak memuat kunci Gemini.

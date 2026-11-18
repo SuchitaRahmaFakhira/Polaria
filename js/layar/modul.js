@@ -4,6 +4,8 @@ import { ikon } from "../ikon.js";
 import { kepala, tombolRumus, garisBilangan, tabelPola, visualTitik, kotakIngat, legenda } from "../komponen.js";
 import { cariModul, jumlahKuis, URUTAN_MODUL } from "../materi/konten.js";
 import { statusModul, selesaikanModul } from "../progres.js";
+import { ubah } from "../data.js";
+import { simpanJurnal } from "../supabase.js";
 
 function visual(v) {
   if (!v) return null;
@@ -63,6 +65,7 @@ export function layarModul(id) {
   let indeks = 0;
   let langkahTampil = 1;
   let selesai = false;
+  let jurnalModul = "";
 
   const wadah = h("div", { class: "tumpuk" });
   const layar = h("section", { class: "layar" }, kepala(modul.judul, "#/materi", tombolRumus()), wadah);
@@ -75,6 +78,11 @@ export function layarModul(id) {
     if (ke >= slide.length) {
       selesai = true;
       selesaikanModul(modul.id, skor(), totalKuis);
+      const teks = jurnalModul.trim();
+      if (teks.length >= 5) {
+        ubah((d) => d.jurnal.push({ konteks: modul.id, isi: teks, waktu: new Date().toISOString() }));
+        simpanJurnal(modul.id, teks);
+      }
     } else {
       indeks = ke;
       langkahTampil = 1;
@@ -163,7 +171,13 @@ export function layarModul(id) {
           h(
             "ol",
             { class: "langkah-contoh" },
-            s.langkah.map((l, i) => h("li", { class: i < langkahTampil ? "" : "tertutup", "aria-hidden": String(i >= langkahTampil) }, i < langkahTampil ? l : "…")),
+            s.langkah.map((l, i) =>
+              h(
+                "li",
+                { class: i < langkahTampil ? "" : "tertutup", "aria-hidden": String(i >= langkahTampil) },
+                i < langkahTampil ? h("span", {}, s.fase?.[i] ? h("span", { class: "label-fase" }, s.fase[i]) : null, l) : "…",
+              ),
+            ),
           ),
           h("p", { class: "kecil redup" }, langkahTampil < s.langkah.length ? "Ketuk Lanjut untuk langkah berikutnya." : "Semua langkah sudah tampil."),
         );
@@ -203,6 +217,38 @@ export function layarModul(id) {
           h("ul", { class: "paragraf", style: { paddingLeft: "20px", margin: 0 } }, s.poin.map((p) => h("li", {}, p))),
           legenda(),
         );
+      // ---- Lapisan RMT / Mediated Learning Experience ----
+      case "tujuan": // intensionalitas
+        return h(
+          "div",
+          { class: "kartu tumpuk" },
+          h("span", { class: "label-pil" }, "Tujuan belajar"),
+          h("h2", { class: "slide-judul" }, s.judul),
+          h("ul", { class: "paragraf", style: { paddingLeft: "20px", margin: 0 } }, s.poin.map((p) => h("li", {}, p))),
+        );
+      case "makna": // pemberian makna, konsep sehari-hari → konsep ilmiah
+      case "transendensi": // aturan berlaku melampaui soal ini
+        return h(
+          "div",
+          { class: "kartu tumpuk" },
+          h("span", { class: "label-pil" }, s.jenis === "makna" ? "Kenapa ini penting?" : "Di mana lagi?"),
+          h("h2", { class: "slide-judul" }, s.judul),
+          h("div", { class: "paragraf" }, s.paragraf.map((p) => h("p", {}, p))),
+          s.contoh ? h("div", { class: "chip-pilihan" }, s.contoh.map((c) => h("span", { class: "chip-opsi", "aria-pressed": "false" }, c))) : null,
+        );
+      case "refleksi": { // metakognisi: jurnal refleksi
+        const area = h("textarea", { class: "bidang area-teks", rows: 3, maxlength: 500, "aria-label": s.pertanyaan, placeholder: "Tulis dengan kalimatmu sendiri…" });
+        area.value = jurnalModul;
+        area.addEventListener("input", () => (jurnalModul = area.value));
+        return h(
+          "div",
+          { class: "kartu tumpuk" },
+          h("span", { class: "label-pil" }, "Jurnal refleksi"),
+          h("p", { class: "teks-soal" }, s.pertanyaan),
+          area,
+          h("p", { class: "kecil redup" }, "Boleh dilewati. Jurnalmu tersimpan saat modul selesai."),
+        );
+      }
       default:
         return null;
     }

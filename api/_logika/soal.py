@@ -52,6 +52,11 @@ def _teks_barisan(deret: list[int]) -> str:
     return ", ".join(str(x) for x in deret) + ", …"
 
 
+def dict_konteks() -> dict:
+    """Peta kode konteks → (jenis, ukuran) yang sah."""
+    return {k: (j, u) for k, j, u in KONTEKS_CERITA}
+
+
 def teks_cerita(konteks: str, jenis: str, n: int) -> str:
     b = pola.suku_ke(jenis, n)
     teks = {
